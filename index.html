@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savanastraux - Calculateur de Placement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .section select, .section input[type="radio"], .section input[type="range"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .section select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 1rem;
+        }
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-group input[type="range"] {
+            flex-grow: 1;
+        }
+        .slider-group #numPlayersValue, .slider-group #playersPlayedBeforeValue {
+            min-width: 25px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e9f7ef;
+            min-height: 80px;
+            text-align: center;
+        }
+        #results p {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        #results .main-info {
+            font-size: 1.6em;
+            color: #007bff;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        #results .secondary-info {
+            font-size: 1.1em;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        #results .spell-info {
+            background-color: #d1ecf1;
+            border-left: 5px solid #00a0e3;
+            padding: 10px;
+            margin-top: 15px;
+            text-align: left;
+            font-weight: normal;
+            color: #0c5460;
+        }
+        #results .spell-info strong {
+            color: #0c5460;
+        }
+        .element-display {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white; /* Texte blanc par défaut pour tous les elements */
+            margin-left: 5px;
+        }
+        /* Couleurs pour les elements - CORRIGÉES */
+        .element-Feu { background-color: #e74c3c; } /* Rouge */
+        .element-Eau { background-color: #3498db; } /* Bleu */
+        .element-Terre { background-color: #2ecc71; } /* Vert (pour Terre) */
+        .element-Air { background-color: #8e44ad; } /* Violet foncé (pour Air) */
+        /* Couleurs pour les elements corrompus - CORRIGÉES */
+        .element-FeuC { background-color: #c0392b; }
+        .element-EauC { background-color: #2980b9; }
+        .element-TerreC { background-color: #27ae60; } /* Vert (pour Terre C) */
+        .element-AirC { background-color: #7d3c98; } /* Violet foncé (pour Air C) */
+
+        .small-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Savanastraux - Calculateur de Placement</h1>
+        <p>Découvrez rapidement votre placement et anticipez les actions du boss.</p>
+
+        <div class="section">
+            <label for="phaseSelect">1. Sélectionnez la Phase :</label>
+            <div class="radio-group">
+                <input type="radio" id="phase1" name="phase" value="P1" checked>
+                <label for="phase1">Phase I</label>
+                <input type="radio" id="phase2" name="phase" value="P2">
+                <label for="phase2">Phase II</label>
+                <input type="radio" id="phase3" name="phase" value="P3">
+                <label for="phase3">Phase III</label>
+            </div>
+        </div>
+
+        <div class="section" id="numPlayersSection">
+            <label for="numPlayers">2. Nombre de Joueurs Vivants dans l'équipe :</label>
+            <div class="slider-group">
+                <input type="range" id="numPlayers" min="1" max="6" value="6">
+                <span id="numPlayersValue">6</span>
+            </div>
+            <p class="small-text">Ce nombre total affecte la rotation des éléments du boss en Phases II et III.</p>
+        </div>
+
+        <div class="section" id="placerOptionsSection">
+            <input type="checkbox" id="isPlaceur">
+            <label for="isPlaceur" style="display: inline-block; font-weight: bold;">Je suis un placeur (pour positionner mes alliés)</label>
+            <div id="playersPlayedBeforeSection" class="hidden">
+                <label for="playersPlayedBefore">Nombre de joueurs déjà joués AVANT la cible :</label>
+                <div class="slider-group">
+                    <input type="range" id="playersPlayedBefore" min="0" max="5" value="0">
+                    <span id="playersPlayedBeforeValue">0</span>
+                </div>
+                <p class="small-text">Indiquez combien de joueurs, **vous compris (si vous avez déjà joué)**, ont fini leur tour avant le joueur que vous souhaitez placer. Ce nombre détermine les changements d'élément du boss avant la cible.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <label for="bossElementSelect">3. Élément Actuel du Boss :</label>
+            <select id="bossElementSelect">
+                </select>
+        </div>
+
+        <div id="results">
+            <h2>Prêt pour le Combat ?</h2>
+            <p>Ajustez les options ci-dessus pour obtenir les informations.</p>
+        </div>
+
+        <div class="small-text">
+            <p>Ce calculateur vous aide pour votre auto-placement ou le placement de vos alliés. Les informations détaillées sur les déplacements spécifiques des alliés ("J+X") sont omises ici pour plus de simplicité.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- DÉFINITION DES CYCLES D'ÉLÉMENTS ---
+        const elementCycles = {
+            "P1": ["Feu", "Eau", "Terre", "Air"],
+            "P2": ["Feu", "Eau", "Terre", "Air"],
+            "P3": ["Feu", "Feu C", "Eau", "Eau C", "Terre", "Terre C", "Air", "Air C"]
+        };
+
+        // --- MAPPAGE DES PILIERS CIBLES EN FONCTION DE L'ÉLÉMENT FUTUR DU BOSS ---
+        // P2 : Le pilier cible est l'élément qui précède l'élément du boss futur (ou +3) dans le cycle de 4.
+        const p2TargetPillarMap = {
+            "Feu": "Air",
+            "Eau": "Feu",
+            "Terre": "Eau",
+            "Air": "Terre"
+        };
+
+        // P3 : Mappage Pilier Cible en fonction de l'ÉLÉMENT FUTUR du boss, déduit des tableaux d'autoplacement pour 6 joueurs
+        const p3DerivedTargetPillarMap = {
+            "Air C": "Eau C",
+            "Eau": "Air C",
+            "Terre C": "Terre C",
+            "Feu": "Feu C",
+            "Air": "Eau",
+            "Feu C": "Feu",
+            "Eau C": "Feu",
+            "Terre": "Terre"
+        };
+
+        // --- DÉFINITION DES SORTS DU BOSS SELON SON ÉLÉMENT ---
+        const bossSpells = {
+            "Terre": "Séisme : Zone de 2 autour de chaque joueur (invocations comprises)",
+            "Air": "Tempête : Ne Pas être aligné aux totems",
+            "Feu": "Choc Infernal / Éruption : Ne pas être à l'extérieur des totems",
+            "Eau": "Tsunami : Ne pas se situer à l'intérieur des Totems",
+            // Pour les éléments corrompus, on réutilise la description du sort de base avec une note.
+            "Feu C": "Choc Infernal / Éruption : Ne pas être à l'extérieur des totems (version corrompue)",
+            "Eau C": "Tsunami : Ne pas se situer à l'intérieur des Totems (version corrompue)",
+            "Terre C": "Séisme : Zone de 2 autour de chaque joueur (version corrompue)",
+            "Air C": "Tempête : Ne Pas être aligné aux totems (version corrompue)"
+        };
+
+
+        const phaseRadios = document.querySelectorAll('input[name="phase"]');
+        const numPlayersSlider = document.getElementById('numPlayers');
+        const numPlayersValueSpan = document.getElementById('numPlayersValue');
+        const isPlaceurCheckbox = document.getElementById('isPlaceur');
+        const placerOptionsSection = document.getElementById('placerOptionsSection');
+        const playersPlayedBeforeSection = document.getElementById('playersPlayedBeforeSection');
+        const playersPlayedBeforeSlider = document.getElementById('playersPlayedBefore');
+        const playersPlayedBeforeValueSpan = document.getElementById('playersPlayedBeforeValue');
+        const bossElementSelect = document.getElementById('bossElementSelect');
+        const resultsDiv = document.getElementById('results');
+        const numPlayersSection = document.getElementById('numPlayersSection');
+
+
+        // Fonction pour mettre à jour le maximum et la valeur affichée du slider "playersPlayedBefore"
+        function updatePlayersPlayedBeforeMax() {
+            const currentNumPlayers = parseInt(numPlayersSlider.value);
+            // Le nombre max de joueurs qui ont joué avant une cible est (nombre total de joueurs - 1)
+            playersPlayedBeforeSlider.max = Math.max(0, currentNumPlayers - 1);
+            
+            // Si la valeur actuelle du slider est supérieure au nouveau maximum, la réduire
+            if (parseInt(playersPlayedBeforeSlider.value) > playersPlayedBeforeSlider.max) {
+                 playersPlayedBeforeSlider.value = playersPlayedBeforeSlider.max;
+            }
+            // Mettre à jour le texte affiché QUEL QUE SOIT LE CAS
+            playersPlayedBeforeValueSpan.textContent = playersPlayedBeforeSlider.value;
+        }
+
+        // Mettre à jour la valeur affichée des sliders
+        numPlayersSlider.addEventListener('input', () => {
+            numPlayersValueSpan.textContent = numPlayersSlider.value;
+            updatePlayersPlayedBeforeMax(); // Appel de la fonction de mise à jour du max
+            calculatePlacement(); // Rendre réactif
+        });
+
+        playersPlayedBeforeSlider.addEventListener('input', () => {
+            playersPlayedBeforeValueSpan.textContent = playersPlayedBeforeSlider.value;
+            calculatePlacement(); // Rendre réactif
+        });
+
+        // Gérer la visibilité du slider "playersPlayedBefore"
+        isPlaceurCheckbox.addEventListener('change', () => {
+            if (isPlaceurCheckbox.checked) {
+                playersPlayedBeforeSection.classList.remove('hidden');
+                updatePlayersPlayedBeforeMax(); // Mise à jour du max à l'activation
+            } else {
+                playersPlayedBeforeSection.classList.add('hidden');
+                playersPlayedBeforeSlider.value = 0; // Réinitialiser pour éviter des calculs étranges
+                playersPlayedBeforeValueSpan.textContent = 0; // Mettre à jour le span après reset
+            }
+            calculatePlacement(); // Rendre réactif
+        });
+
+
+        // Fonction pour obtenir un élément décalé dans le cycle
+        function calculateNextElement(currentElement, numSteps, cycleElements) {
+            const currentIndex = cycleElements.indexOf(currentElement);
+            if (currentIndex === -1) {
+                console.error("Élément non trouvé dans le cycle:", currentElement);
+                return null;
+            }
+
+            const cycleLength = cycleElements.length;
+            let nextIndex = (currentIndex + numSteps) % cycleLength;
+
+            if (nextIndex < 0) {
+                nextIndex += cycleLength;
+            }
+            return cycleElements[nextIndex];
+        }
+
+        // Fonction pour mettre à jour les options du select en fonction de la phase
+        function updateBossElementOptions() {
+            const selectedPhase = document.querySelector('input[name="phase"]:checked').value;
+            const elements = elementCycles[selectedPhase];
+
+            // Masquer/afficher la section "Nombre de joueurs vivants"
+            if (selectedPhase === "P1") {
+                numPlayersSection.style.display = 'none';
+            } else {
+                numPlayersSection.style.display = 'block';
+            }
+
+            // Masquer/afficher la section "Je suis un placeur" (et son contenu)
+            if (selectedPhase === "P1") {
+                placerOptionsSection.classList.add('hidden');
+                // S'assurer que le mode placeur est désactivé si on est en P1
+                isPlaceurCheckbox.checked = false;
+                playersPlayedBeforeSection.classList.add('hidden');
+                playersPlayedBeforeSlider.value = 0; // Réinitialiser
+                playersPlayedBeforeValueSpan.textContent = 0; // Mettre à jour le span après reset
+            } else {
+                placerOptionsSection.classList.remove('hidden');
+            }
+
+
+            bossElementSelect.innerHTML = '';
+            elements.forEach(element => {
+                const option = document.createElement('option');
+                option.value = element;
+                option.textContent = element;
+                bossElementSelect.appendChild(option);
+            });
+
+            updatePlayersPlayedBeforeMax(); // S'assurer que le max est correct lors du changement de phase
+            calculatePlacement(); // Rendre réactif dès le changement de phase
+        }
+
+        // Écouteurs d'événements pour la réactivité
+        phaseRadios.forEach(radio => {
+            radio.addEventListener('change', updateBossElementOptions);
+        });
+
+        bossElementSelect.addEventListener('change', calculatePlacement); // Rendre réactif
+
+        // Appel initial pour configurer l'interface et afficher les premiers résultats
+        document.addEventListener('DOMContentLoaded', updateBossElementOptions);
+
+
+        // Fonction principale de calcul et d'affichage
+        function calculatePlacement() {
+            const selectedPhase = document.querySelector('input[name="phase"]:checked').value;
+            const selectedBossElement = bossElementSelect.value;
+            const numPlayersTotal = parseInt(numPlayersSlider.value);
+            const isPlaceurMode = isPlaceurCheckbox.checked;
+            // playersAlreadyPlayed prendra la valeur du slider si mode placeur ET si ce n'est pas P1, sinon 0.
+            const playersAlreadyPlayed = (isPlaceurMode && selectedPhase !== "P1") ? parseInt(playersPlayedBeforeSlider.value) : 0; 
+
+            let pillarToFinishOn = "Non déterminé";
+            let playerElementIfPlaced = "Non déterminé";
+            let bossElementAtBossTurn = "Non déterminé";
+            let bossSpellDescription = "N/A";
+            let targetPlayerLabel = isPlaceurMode ? "Le joueur cible" : "Vous";
+
+
+            const currentCycle = elementCycles[selectedPhase];
+            if (!currentCycle) {
+                resultsDiv.innerHTML = `<h2>Erreur</h2><p>Phase sélectionnée invalide.</p>`;
+                return;
+            }
+            const cycleLength = currentCycle.length;
+
+            // Élément du boss au début du tour du joueur CIBLE (ou du joueur lui-même)
+            // En P1, ce décalage n'affecte pas le pilier cible, car le placement se base sur l'élément initial du boss.
+            // En P2/P3, il affecte l'élément du boss face à la cible.
+            let bossElementAtTargetPlayerTurn;
+            if (selectedPhase === "P1") {
+                bossElementAtTargetPlayerTurn = selectedBossElement; // En P1, l'élément du boss est stable pour le placement du joueur
+            } else {
+                bossElementAtTargetPlayerTurn = calculateNextElement(selectedBossElement, playersAlreadyPlayed, currentCycle);
+            }
+
+            if (selectedPhase === "P1") {
+                // En P1, la règle du boss est qu'il ne change d'élément qu'à son tour.
+                // Le pilier cible est déterminé par l'élément actuel du boss (règle P2 -1)
+                pillarToFinishOn = p2TargetPillarMap[selectedBossElement];
+                playerElementIfPlaced = pillarToFinishOn;
+
+                // L'élément du boss à son propre tour : Il aura changé numPlayersTotal fois (un changement par joueur)
+                bossElementAtBossTurn = calculateNextElement(selectedBossElement, numPlayersTotal, currentCycle);
+
+            } else { // P2 ou P3
+                // Le pilier cible est déterminé par l'élément du boss AU DÉBUT du tour de la cible (après les décalages des joueurs précédents)
+                if (selectedPhase === "P2") {
+                    pillarToFinishOn = p2TargetPillarMap[bossElementAtTargetPlayerTurn];
+                } else if (selectedPhase === "P3") {
+                    pillarToFinishOn = p3DerivedTargetPillarMap[bossElementAtTargetPlayerTurn];
+                }
+                playerElementIfPlaced = pillarToFinishOn;
+
+                // L'élément du boss au début de son propre tour (après TOUS les joueurs vivants)
+                bossElementAtBossTurn = calculateNextElement(selectedBossElement, numPlayersTotal, currentCycle);
+            }
+
+            // Récupérer la description du sort du boss
+            bossSpellDescription = bossSpells[bossElementAtBossTurn] || "Information sur le sort non disponible pour cet élément.";
+
+
+            // --- AFFICHAGE DES RÉSULTATS ---
+            let htmlContent = `<h2>Infos Clés pour le Tour :</h2>`;
+            htmlContent += `<p class="secondary-info">Boss actuellement : <span class="element-display element-${selectedBossElement.replace(' ', '')}"><strong>${selectedBossElement}</strong></span></p>`;
+
+            htmlContent += `<p>${targetPlayerLabel} doit finir son tour près d'un pilier :</p>`;
+            // Ajout de la classe d'élément au pilier cible
+            htmlContent += `<p class="main-info"><span class="element-display element-${pillarToFinishOn.replace(' ', '')}">**${pillarToFinishOn}**</span></p>`;
+            htmlContent += `<p class="secondary-info">Ce qui lui donnera l'élément : <span class="element-display element-${playerElementIfPlaced.replace(' ', '')}"><strong>${playerElementIfPlaced}</strong></span></p>`;
+
+            // Ajout de la classe d'élément à l'élément du boss au début de son tour
+            htmlContent += `<p class="secondary-info">Au début du tour du **Boss**, il sera : <span class="element-display element-${bossElementAtBossTurn.replace(' ', '')}"><strong>${bossElementAtBossTurn}</strong></span></p>`;
+            htmlContent += `<div class="spell-info"><strong>Sort du Boss :</strong> ${bossSpellDescription}</div>`;
+
+            resultsDiv.innerHTML = htmlContent;
+        }
+    </script>
+</body>
+</html>
