@@ -111,19 +111,19 @@
             padding: 5px 10px;
             border-radius: 4px;
             font-weight: bold;
-            color: white; /* Texte blanc par défaut pour tous les elements */
+            color: white;
             margin-left: 5px;
         }
-        /* Couleurs pour les elements - CORRIGÉES */
-        .element-Feu { background-color: #e74c3c; } /* Rouge */
-        .element-Eau { background-color: #3498db; } /* Bleu */
-        .element-Terre { background-color: #2ecc71; } /* Vert (pour Terre) */
-        .element-Air { background-color: #8e44ad; } /* Violet foncé (pour Air) */
-        /* Couleurs pour les elements corrompus - CORRIGÉES */
+        /* Couleurs harmonisées pour les éléments */
+        .element-Feu { background-color: #e74c3c; }
+        .element-Eau { background-color: #3498db; }
+        .element-Terre { background-color: #27ae60; }
+        .element-Air { background-color: #9b59b6; }
+        /* Couleurs pour les éléments corrompus (versions plus sombres) */
         .element-FeuC { background-color: #c0392b; }
         .element-EauC { background-color: #2980b9; }
-        .element-TerreC { background-color: #27ae60; } /* Vert (pour Terre C) */
-        .element-AirC { background-color: #7d3c98; } /* Violet foncé (pour Air C) */
+        .element-TerreC { background-color: #1e8449; }
+        .element-AirC { background-color: #8e44ad; }
 
         .small-text {
             font-size: 0.9em;
@@ -406,8 +406,8 @@
                 bossElementAtBossTurn = calculateNextElement(selectedBossElement, numPlayersTotal, currentCycle);
             }
 
-            // Récupérer la description du sort du boss
-            bossSpellDescription = bossSpells[bossElementAtBossTurn] || "Information sur le sort non disponible pour cet élément.";
+            // CORRECTION: Le sort du boss est basé sur son élément ACTUEL, pas futur
+            bossSpellDescription = bossSpells[selectedBossElement] || "Information sur le sort non disponible pour cet élément.";
 
 
             // --- AFFICHAGE DES RÉSULTATS ---
@@ -421,7 +421,9 @@
 
             // Ajout de la classe d'élément à l'élément du boss au début de son tour
             htmlContent += `<p class="secondary-info">Au début du tour du **Boss**, il sera : <span class="element-display element-${bossElementAtBossTurn.replace(' ', '')}"><strong>${bossElementAtBossTurn}</strong></span></p>`;
-            htmlContent += `<div class="spell-info"><strong>Sort du Boss :</strong> ${bossSpellDescription}</div>`;
+            
+            // CORRECTION: Affichage du sort basé sur l'élément actuel du boss
+            htmlContent += `<div class="spell-info"><strong>Sort du Boss (élément actuel) :</strong> ${bossSpellDescription}</div>`;
 
             resultsDiv.innerHTML = htmlContent;
         }
