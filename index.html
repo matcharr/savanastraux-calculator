@@ -406,24 +406,38 @@
                 bossElementAtBossTurn = calculateNextElement(selectedBossElement, numPlayersTotal, currentCycle);
             }
 
-            // CORRECTION: Le sort du boss est basé sur son élément ACTUEL, pas futur
-            bossSpellDescription = bossSpells[selectedBossElement] || "Information sur le sort non disponible pour cet élément.";
+            // Le sort du boss dépend de la phase :
+            // P1 : Boss lance le sort de son élément actuel, puis change d'élément
+            // P2/P3 : Boss change d'élément d'abord, puis lance le sort du nouvel élément
+            let bossElementForSpell;
+            if (selectedPhase === "P1") {
+                bossElementForSpell = selectedBossElement; // Sort basé sur l'élément actuel
+            } else {
+                bossElementForSpell = bossElementAtBossTurn; // Sort basé sur le nouvel élément
+            }
+            bossSpellDescription = bossSpells[bossElementForSpell] || "Information sur le sort non disponible pour cet élément.";
 
 
             // --- AFFICHAGE DES RÉSULTATS ---
-            let htmlContent = `<h2>Infos Clés pour le Tour :</h2>`;
-            htmlContent += `<p class="secondary-info">Boss actuellement : <span class="element-display element-${selectedBossElement.replace(' ', '')}"><strong>${selectedBossElement}</strong></span></p>`;
+            let htmlContent = `<h2>Informations de Placement :</h2>`;
+            htmlContent += `<p class="secondary-info">Élément actuel du Boss : <span class="element-display element-${selectedBossElement.replace(' ', '')}"><strong>${selectedBossElement}</strong></span></p>`;
 
-            htmlContent += `<p>${targetPlayerLabel} doit finir son tour près d'un pilier :</p>`;
+            htmlContent += `<p>${targetPlayerLabel} ${targetPlayerLabel === "Vous" ? "devez" : "doit"} finir ${targetPlayerLabel === "Vous" ? "votre" : "son"} tour près du pilier :</p>`;
             // Ajout de la classe d'élément au pilier cible
             htmlContent += `<p class="main-info"><span class="element-display element-${pillarToFinishOn.replace(' ', '')}">**${pillarToFinishOn}**</span></p>`;
-            htmlContent += `<p class="secondary-info">Ce qui lui donnera l'élément : <span class="element-display element-${playerElementIfPlaced.replace(' ', '')}"><strong>${playerElementIfPlaced}</strong></span></p>`;
+            htmlContent += `<p class="secondary-info">Cela ${targetPlayerLabel === "Vous" ? "vous" : "lui"} donnera l'élément : <span class="element-display element-${playerElementIfPlaced.replace(' ', '')}"><strong>${playerElementIfPlaced}</strong></span></p>`;
 
             // Ajout de la classe d'élément à l'élément du boss au début de son tour
-            htmlContent += `<p class="secondary-info">Au début du tour du **Boss**, il sera : <span class="element-display element-${bossElementAtBossTurn.replace(' ', '')}"><strong>${bossElementAtBossTurn}</strong></span></p>`;
+            htmlContent += `<p class="secondary-info">Au tour du Boss, il sera : <span class="element-display element-${bossElementAtBossTurn.replace(' ', '')}"><strong>${bossElementAtBossTurn}</strong></span></p>`;
             
-            // CORRECTION: Affichage du sort basé sur l'élément actuel du boss
-            htmlContent += `<div class="spell-info"><strong>Sort du Boss (élément actuel) :</strong> ${bossSpellDescription}</div>`;
+            // Affichage du sort selon la logique de phase
+            let spellExplanation;
+            if (selectedPhase === "P1") {
+                spellExplanation = "Sort du Boss (avec son élément actuel) :";
+            } else {
+                spellExplanation = "Sort du Boss (après changement) :";
+            }
+            htmlContent += `<div class="spell-info"><strong>${spellExplanation}</strong> ${bossSpellDescription}</div>`;
 
             resultsDiv.innerHTML = htmlContent;
         }
